@@ -58,7 +58,7 @@
   .summary-sub {
     font-size: 0.8rem; color: var(--muted); margin-bottom: 1.25rem;
   }
-  .summary-chart-wrap { position: relative; height: 1520px; }
+  .summary-chart-wrap { position: relative; height: 620px; }
 
   /* ── Filters ── */
   .filters {
@@ -197,13 +197,14 @@ const SUMMARY = [{"label": "7zip Decompression", "vera": 0.858, "turin": 0.577, 
           borderWidth: 2,
           borderDash: [6, 4],
           pointRadius: 0,
+          pointHoverRadius: 0,
           fill: false,
+          tension: 0,
           order: 1,
         },
       ]
     },
     options: {
-      indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
@@ -217,20 +218,26 @@ const SUMMARY = [{"label": "7zip Decompression", "vera": 0.858, "turin": 0.577, 
         tooltip: {
           filter: item => item.datasetIndex < 2,
           callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.x != null ? ctx.parsed.x.toFixed(2) + "x Grace" : "n/a"}`,
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toFixed(2) + "x Grace" : "n/a"}`,
           }
         },
       },
       scales: {
         x: {
-          title: { display: true, text: 'Performance relative to Grace (Grace = 1.0  |  dashed blue line)', color: tickColor, font: { size: 11 } },
+          ticks: {
+            color: tickColor,
+            font: { size: 10 },
+            maxRotation: 60,
+            minRotation: 60,
+            autoSkip: false,
+          },
+          grid: { color: gridColor },
+        },
+        y: {
+          title: { display: true, text: 'Performance relative to Grace (dashed blue = 1.0)', color: tickColor, font: { size: 11 } },
           ticks: { color: tickColor, font: { size: 10 }, callback: v => v.toFixed(1) + 'x' },
           grid: { color: gridColor },
           beginAtZero: true,
-        },
-        y: {
-          ticks: { color: tickColor, font: { size: 10 }, autoSkip: false },
-          grid: { color: gridColor },
         }
       }
     }
