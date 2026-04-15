@@ -5,16 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CPU Benchmark Comparison: Vera vs Grace vs Turin</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3/dist/chartjs-plugin-annotation.min.js"></script>
 <style>
   :root {
-    --vera: #5a8a00; --grace: #2176c7; --turin: #c0000f;
-    --bg: #ffffff; --card: #f8f9fa; --border: #e2e8f0;
-    --text: #111827; --muted: #64748b; --label: #374151;
+    --vera:   #5a8a00;
+    --grace:  #2176c7;
+    --turin:  #c0000f;
+    --bg:     #ffffff;
+    --card:   #f8f9fa;
+    --border: #e2e8f0;
+    --text:   #111827;
+    --muted:  #64748b;
+    --label:  #374151;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); }
+  body { font-family: "Segoe UI", system-ui, sans-serif; background: #ffffff; color: var(--text); }
+
   header {
-    background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 100%);
+    background: #f8fafc;
     border-bottom: 1px solid var(--border);
     padding: 2rem;
     text-align: center;
@@ -24,25 +32,50 @@
   header h1 span.g { color: var(--grace); }
   header h1 span.t { color: var(--turin); }
   .subtitle { color: var(--muted); margin-top: 0.5rem; font-size: 0.88rem; }
+
   .legend {
     display: flex; justify-content: center; gap: 2rem;
     padding: 1rem 2rem; flex-wrap: wrap;
-    background: var(--card); border-bottom: 1px solid var(--border);
+    background: #ffffff; border-bottom: 1px solid var(--border);
   }
   .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
   .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Summary section ── */
+  .summary-section {
+    max-width: 1400px;
+    margin: 1.5rem auto;
+    padding: 0 1.5rem;
+  }
+  .summary-card {
+    background: #f8f9fa;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .summary-title {
+    font-size: 1.05rem; font-weight: 700; margin-bottom: 0.3rem;
+  }
+  .summary-sub {
+    font-size: 0.8rem; color: var(--muted); margin-bottom: 1.25rem;
+  }
+  .summary-chart-wrap { position: relative; height: 1280px; }
+
+  /* ── Filters ── */
   .filters {
-    padding: 0.75rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.5rem; background: #ffffff; border-bottom: 1px solid var(--border);
     display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;
   }
   .filters label { color: var(--muted); font-size: 0.82rem; margin-right: 0.25rem; }
   .filter-btn {
     padding: 0.28rem 0.75rem; border-radius: 999px; border: 1px solid var(--border);
-    background: transparent; color: var(--label); cursor: pointer; font-size: 0.78rem;
+    background: #ffffff; color: var(--label); cursor: pointer; font-size: 0.78rem;
     transition: all 0.15s;
   }
-  .filter-btn.active { background: var(--vera); border-color: var(--vera); color: #000; font-weight: 600; }
+  .filter-btn.active { background: var(--vera); border-color: var(--vera); color: #fff; font-weight: 600; }
   .filter-btn:hover:not(.active) { border-color: var(--vera); color: var(--vera); }
+
+  /* ── Individual chart grid ── */
   main {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
@@ -52,24 +85,21 @@
     margin: 0 auto;
   }
   .card {
-    background: var(--card);
+    background: #f8f9fa;
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 1.2rem;
     display: flex; flex-direction: column; gap: 0.65rem;
   }
   .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
-  .card-title { font-weight: 600; font-size: 0.92rem; line-height: 1.35; }
+  .card-title { font-weight: 600; font-size: 0.92rem; line-height: 1.35; color: var(--text); }
   .card-cat {
     font-size: 0.68rem; font-weight: 600; padding: 0.18rem 0.5rem;
     border-radius: 999px; white-space: nowrap; flex-shrink: 0;
     background: #e8edf3; color: var(--muted);
   }
   .chart-wrap { position: relative; height: 200px; }
-  .direction-badge {
-    font-size: 0.7rem; color: var(--muted);
-    display: flex; align-items: center; gap: 0.3rem;
-  }
+  .direction-badge { font-size: 0.7rem; color: var(--muted); display: flex; align-items: center; gap: 0.3rem; }
   .direction-badge.lower { color: #b45309; }
   .ratios { display: flex; gap: 0.6rem; flex-wrap: wrap; }
   .ratio-pill {
@@ -82,7 +112,7 @@
   .config-table td { padding: 0.2rem 0.4rem; border-top: 1px solid #e2e8f0; vertical-align: top; }
   .config-table td:first-child { color: var(--muted); white-space: nowrap; width: 48px; }
   .config-table td:last-child { color: var(--label); font-family: monospace; font-size: 0.72rem; }
-  footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: 0.78rem; border-top: 1px solid var(--border); margin-top: 1rem; }
+  footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: 0.78rem; border-top: 1px solid var(--border); margin-top: 1rem; background: #ffffff; }
 </style>
 </head>
 <body>
@@ -97,14 +127,23 @@
 </header>
 
 <div class="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:#76b900"></div> Vera (176 threads, HBM)</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#4299e1"></div> Grace (72 cores, Neoverse V2)</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#ed1c24"></div> Turin EPYC 9755 (256 threads, DDR5-6000)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5a8a00"></div> Vera (176 threads, HBM2e)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2176c7"></div> Grace (72 cores, Neoverse V2) = 1.0 reference</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c0000f"></div> Turin EPYC 9755 (256 threads, DDR5-6000)</div>
+</div>
+
+<!-- Summary overview chart -->
+<div class="summary-section">
+  <div class="summary-card">
+    <div class="summary-title">Overview &mdash; All Benchmarks Relative to Grace (1.0)</div>
+    <div class="summary-sub">Bars show performance normalized to Grace = 1.0. Values &gt; 1.0 are faster/better than Grace. For time-based metrics, ratio is inverted so higher always means better.</div>
+    <div class="summary-chart-wrap"><canvas id="summaryChart"></canvas></div>
+  </div>
 </div>
 
 <div class="filters">
   <label>Category:</label>
-  <button class="filter-btn active" onclick="filter(this,'all')">All</button>
+  <button class="filter-btn active" onclick="filterCat(this,'all')">All</button>
 </div>
 
 <main id="grid"></main>
@@ -112,55 +151,146 @@
 <footer>Generated 2026-04-15 &nbsp;&bull;&nbsp; Vera Python 3.13 / Turin Python 3.12 for pyperformance &nbsp;&bull;&nbsp; dav1d &amp; build-linux-kernel Turin numbers flagged for re-run</footer>
 
 <script>
-const CHARTS = [{"title": "stream — Triad", "category": "Memory", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 1029171.8, "color": "#76b900"}, {"label": "Turin", "value": 351478.0, "color": "#ed1c24"}], "configs": [["Vera", "T=176,300M"], ["Turin", "T=256,300M"]], "vg": "", "vt": "2.93x"}, {"title": "sysbench — CPU events/sec", "category": "System", "unit": "events/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 661027.47, "color": "#76b900"}, {"label": "Grace", "value": 282622.65, "color": "#4299e1"}, {"label": "Turin", "value": 659128.49, "color": "#ed1c24"}], "configs": [["Vera", "T=176,30s"], ["Grace", "T=72,30s"], ["Turin", "T=256,30s"]], "vg": "2.34x", "vt": "1.00x"}, {"title": "m-queens — N=18 Queens", "category": "Algorithm", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 159.442, "color": "#76b900"}, {"label": "Grace", "value": 146.531, "color": "#4299e1"}, {"label": "Turin", "value": 190.89, "color": "#ed1c24"}], "configs": [["Vera", "OMP,T=176"], ["Grace", "OMP,T=72"], ["Turin", "OMP,T=256"]], "vg": "0.92x", "vt": "1.20x"}, {"title": "stress-ng — bogo ops/s", "category": "System", "unit": "ops/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 54025.86, "color": "#76b900"}, {"label": "Grace", "value": 31667.36, "color": "#4299e1"}, {"label": "Turin", "value": 359795.72, "color": "#ed1c24"}], "configs": [["Vera", "T=176,cpu-ops=100k"], ["Grace", "T=72,cpu-ops=100k"], ["Turin", "T=256,cpu-ops=100k"]], "vg": "1.71x", "vt": "0.15x"}, {"title": "scikit-learn — RandomForest fit", "category": "ML", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 1.942, "color": "#76b900"}, {"label": "Grace", "value": 3.843, "color": "#4299e1"}], "configs": [["Vera", "n=100k,500 trees,n_jobs=-1"], ["Grace", "n=100k,500 trees,n_jobs=-1"]], "vg": "1.98x", "vt": ""}, {"title": "tjbench — JPEG compress", "category": "Imaging", "unit": "MP/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 416.410733, "color": "#76b900"}, {"label": "Grace", "value": 325.671309, "color": "#4299e1"}], "configs": [["Vera", "1920x1080,q=95"], ["Grace", "1920x1080,q=95"]], "vg": "1.28x", "vt": ""}, {"title": "npb — EP Mop/s", "category": "HPC", "unit": "Mop/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 29043.32, "color": "#76b900"}, {"label": "Grace", "value": 12986.41, "color": "#4299e1"}, {"label": "Turin", "value": 19100.74, "color": "#ed1c24"}], "configs": [["Vera", "Class=C,T=176"], ["Grace", "Class=C,T=72"], ["Turin", "Class=C,T=256"]], "vg": "2.24x", "vt": "1.52x"}, {"title": "build-php — Compile Time", "category": "Build", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 15.0, "color": "#76b900"}, {"label": "Grace", "value": 19.0, "color": "#4299e1"}, {"label": "Turin", "value": 18.0, "color": "#ed1c24"}], "configs": [["Vera", "-j176,--disable-all"], ["Grace", "-j72,--disable-all"], ["Turin", "-j256,--disable-all"]], "vg": "1.27x", "vt": "1.20x"}, {"title": "build-linux-kernel — Compile Time", "category": "Build", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 20.0, "color": "#76b900"}, {"label": "Grace", "value": 39.0, "color": "#4299e1"}, {"label": "Turin", "value": 1.0, "color": "#ed1c24"}], "configs": [["Vera", "-j176,arm64 defconfig"], ["Grace", "-j72,arm64 defconfig"], ["Turin", "-j256,arm64 defconfig"]], "vg": "1.95x", "vt": "0.05x"}, {"title": "compress-7zip — Compression", "category": "Compression", "unit": "MIPS", "lower_better": false, "datasets": [{"label": "Vera", "value": 6554.0, "color": "#76b900"}, {"label": "Grace", "value": 5754.0, "color": "#4299e1"}, {"label": "Turin", "value": 4820.0, "color": "#ed1c24"}], "configs": [["Vera", "T=176,7z 22.01"], ["Grace", "T=72,7z 22.01"], ["Turin", "T=256,7z 22.01"]], "vg": "1.14x", "vt": "1.36x"}, {"title": "compress-7zip — Decompression", "category": "Compression", "unit": "MIPS", "lower_better": false, "datasets": [{"label": "Vera", "value": 4951.0, "color": "#76b900"}, {"label": "Grace", "value": 5768.0, "color": "#4299e1"}, {"label": "Turin", "value": 3330.0, "color": "#ed1c24"}], "configs": [["Vera", "T=176,7z 22.01"], ["Grace", "T=72,7z 22.01"], ["Turin", "T=256,7z 22.01"]], "vg": "0.86x", "vt": "1.49x"}, {"title": "ramspeed — INTEGER Copy", "category": "Memory", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 231233.5, "color": "#76b900"}, {"label": "Grace", "value": 167664.2, "color": "#4299e1"}, {"label": "Turin", "value": 67668.0, "color": "#ed1c24"}], "configs": [["Vera", "T=176,256MB"], ["Grace", "T=72,256MB"], ["Turin", "T=256,256MB"]], "vg": "1.38x", "vt": "3.42x"}, {"title": "himeno — MFLOPS", "category": "HPC", "unit": "MFLOPS", "lower_better": false, "datasets": [{"label": "Vera", "value": 162217.0, "color": "#76b900"}, {"label": "Grace", "value": 93647.4, "color": "#4299e1"}, {"label": "Turin", "value": 26941.8, "color": "#ed1c24"}], "configs": [["Vera", "3D-stencil,T=176"], ["Grace", "3D-stencil,T=72"], ["Turin", "3D-stencil,T=256"]], "vg": "1.73x", "vt": "6.02x"}, {"title": "onednn — ResNet50 conv GFLOPS", "category": "DL", "unit": "GFLOPS", "lower_better": false, "datasets": [{"label": "Vera", "value": 84130.0, "color": "#76b900"}, {"label": "Grace", "value": 85152.0, "color": "#4299e1"}, {"label": "Turin", "value": 267206.0, "color": "#ed1c24"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "0.99x", "vt": "0.31x"}, {"title": "x264 — Encoding FPS", "category": "Video", "unit": "fps", "lower_better": false, "datasets": [{"label": "Vera", "value": 435.0, "color": "#76b900"}, {"label": "Grace", "value": 342.0, "color": "#4299e1"}, {"label": "Turin", "value": 156.61, "color": "#ed1c24"}], "configs": [["Vera", "1080p,medium,T=176,1800f,src-built+SVE2"], ["Grace", "1080p,medium,T=72,1800f,apt-0.163+NEON"], ["Turin", "1080p,medium,T=256"]], "vg": "1.27x", "vt": "2.78x"}, {"title": "x265 — Encoding FPS", "category": "Video", "unit": "fps", "lower_better": false, "datasets": [{"label": "Vera", "value": 146.0, "color": "#76b900"}, {"label": "Grace", "value": 119.0, "color": "#4299e1"}, {"label": "Turin", "value": 48.12, "color": "#ed1c24"}], "configs": [["Vera", "1080p,medium,T=44(peak),1800f,src-built+SVE2"], ["Grace", "1080p,medium,T=72,1800f,src-built+SVE2"], ["Turin", "1080p,medium,T=256"]], "vg": "1.23x", "vt": "3.03x"}, {"title": "svt-av1 — Encoding FPS", "category": "Video", "unit": "fps", "lower_better": false, "datasets": [{"label": "Vera", "value": 1193.566, "color": "#76b900"}, {"label": "Grace", "value": 754.816, "color": "#4299e1"}, {"label": "Turin", "value": 387.207, "color": "#ed1c24"}], "configs": [["Vera", "1080p,preset8,LP=176,900f,src-built+armv8.2+dotprod"], ["Grace", "1080p,preset8,LP=72,900f,src-built+armv8.2+dotprod"], ["Turin", "1080p,preset8,LP=256"]], "vg": "1.58x", "vt": "3.08x"}, {"title": "numpy — matmul GFLOPS", "category": "Python/ML", "unit": "GFLOPS", "lower_better": false, "datasets": [{"label": "Vera", "value": 2626.14, "color": "#76b900"}, {"label": "Grace", "value": 1786.3, "color": "#4299e1"}, {"label": "Turin", "value": 2514.43, "color": "#ed1c24"}], "configs": [["Vera", "numpy,OMP_NUM_THREADS=176"], ["Grace", "numpy,OMP_NUM_THREADS=72"], ["Turin", "numpy,OMP_NUM_THREADS=256"]], "vg": "1.47x", "vt": "1.04x"}, {"title": "dav1d — Decode FPS", "category": "Video", "unit": "fps", "lower_better": false, "datasets": [{"label": "Vera", "value": 2183.07, "color": "#76b900"}, {"label": "Grace", "value": 414.02, "color": "#4299e1"}, {"label": "Turin", "value": 23.04, "color": "#ed1c24"}], "configs": [["Vera", "1080p,T=176"], ["Grace", "1080p,T=72"], ["Turin", "1080p,T=256"]], "vg": "5.27x", "vt": "94.75x"}, {"title": "compress-zstd — L3 compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 13634.7, "color": "#76b900"}, {"label": "Grace", "value": 7854.9, "color": "#4299e1"}, {"label": "Turin", "value": 12466.3, "color": "#ed1c24"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "1.74x", "vt": "1.09x"}, {"title": "compress-zstd — L8 compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 2247.3, "color": "#76b900"}, {"label": "Grace", "value": 1969.5, "color": "#4299e1"}, {"label": "Turin", "value": 5840.4, "color": "#ed1c24"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "1.14x", "vt": "0.38x"}, {"title": "compress-zstd — L8 decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 4536.7, "color": "#76b900"}, {"label": "Grace", "value": 1894.7, "color": "#4299e1"}, {"label": "Turin", "value": 2564.6, "color": "#ed1c24"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "2.39x", "vt": "1.77x"}, {"title": "compress-zstd — L19 compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 114.0, "color": "#76b900"}, {"label": "Grace", "value": 78.9, "color": "#4299e1"}, {"label": "Turin", "value": 122.8, "color": "#ed1c24"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "1.44x", "vt": "0.93x"}, {"title": "compress-zstd — L19 decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 4264.6, "color": "#76b900"}, {"label": "Grace", "value": 1810.2, "color": "#4299e1"}, {"label": "Turin", "value": 2504.3, "color": "#ed1c24"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "2.36x", "vt": "1.70x"}, {"title": "compress-zstd — L3-long compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 1367.0, "color": "#76b900"}, {"label": "Grace", "value": 104.3, "color": "#4299e1"}, {"label": "Turin", "value": 626.7, "color": "#ed1c24"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "13.11x", "vt": "2.18x"}, {"title": "compress-zstd — L3-long decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 4809.5, "color": "#76b900"}, {"label": "Grace", "value": 1865.6, "color": "#4299e1"}, {"label": "Turin", "value": 2435.7, "color": "#ed1c24"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "2.58x", "vt": "1.97x"}, {"title": "compress-zstd — L8-long compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 1252.0, "color": "#76b900"}, {"label": "Grace", "value": 170.3, "color": "#4299e1"}, {"label": "Turin", "value": 657.7, "color": "#ed1c24"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "7.35x", "vt": "1.90x"}, {"title": "compress-zstd — L8-long decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 5013.8, "color": "#76b900"}, {"label": "Grace", "value": 2013.7, "color": "#4299e1"}, {"label": "Turin", "value": 2667.7, "color": "#ed1c24"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "2.49x", "vt": "1.88x"}, {"title": "compress-zstd — L19-long compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 66.9, "color": "#76b900"}, {"label": "Grace", "value": 41.3, "color": "#4299e1"}, {"label": "Turin", "value": 66.0, "color": "#ed1c24"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "1.62x", "vt": "1.01x"}, {"title": "compress-zstd — L19-long decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 4562.3, "color": "#76b900"}, {"label": "Grace", "value": 1961.5, "color": "#4299e1"}, {"label": "Turin", "value": 2314.3, "color": "#ed1c24"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "2.33x", "vt": "1.97x"}, {"title": "compress-zstd — L3 decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Grace", "value": 8347.0, "color": "#4299e1"}, {"label": "Turin", "value": 2317.0, "color": "#ed1c24"}], "configs": [["Grace", "T=72"], ["Turin", "T=256"]], "vg": "", "vt": ""}, {"title": "stockfish — Nodes/second (Multi-threaded)", "category": "Chess", "unit": "N/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 165542485.0, "color": "#76b900"}, {"label": "Grace", "value": 95410829.0, "color": "#4299e1"}, {"label": "Turin", "value": 234613216.0, "color": "#ed1c24"}], "configs": [["Vera", "bench 128 T=176"], ["Grace", "bench 128 T=72"], ["Turin", "bench 128 T=256"]], "vg": "1.74x", "vt": "0.71x"}, {"title": "stockfish — Nodes/second (Single-threaded)", "category": "Chess", "unit": "N/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 1752660.0, "color": "#76b900"}, {"label": "Grace", "value": 781056.0, "color": "#4299e1"}, {"label": "Turin", "value": 1772385.0, "color": "#ed1c24"}], "configs": [["Vera", "bench 128 1 30,T=1"], ["Grace", "bench 128 1 30,T=1"], ["Turin", "bench 128 1 30,T=1"]], "vg": "2.24x", "vt": "0.99x"}, {"title": "rust-mandel — 7680x4320 Mandelbrot", "category": "Compute", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 17.467, "color": "#76b900"}, {"label": "Grace", "value": 18.837, "color": "#4299e1"}, {"label": "Turin", "value": 15.78, "color": "#ed1c24"}], "configs": [["Vera", "Rust,single-thread"], ["Grace", "Rust,single-thread"], ["Turin", "Rust,single-thread"]], "vg": "1.08x", "vt": "0.90x"}, {"title": "c-ray — 7500x3500", "category": "Rendering", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 0.042, "color": "#76b900"}, {"label": "Grace", "value": 0.1, "color": "#4299e1"}, {"label": "Turin", "value": 0.107, "color": "#ed1c24"}], "configs": [["Vera", "MT,T=176"], ["Grace", "MT,T=72"], ["Turin", "MT,T=256"]], "vg": "2.38x", "vt": "2.55x"}, {"title": "openssl — AES-256-CBC", "category": "Crypto", "unit": "bytes/sec", "lower_better": false, "datasets": [{"label": "Vera", "value": 340105301237.0, "color": "#76b900"}, {"label": "Grace", "value": 137380630272.0, "color": "#4299e1"}, {"label": "Turin", "value": 294943837562.0, "color": "#ed1c24"}], "configs": [["Vera", "T=176,-multi,-evp"], ["Grace", "T=72,-multi,-evp"], ["Turin", "T=256,-multi,-evp"]], "vg": "2.48x", "vt": "1.15x"}, {"title": "openssl — RSA4096 sign/s", "category": "Crypto", "unit": "sign/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 25758.3, "color": "#76b900"}, {"label": "Grace", "value": 14934.5, "color": "#4299e1"}, {"label": "Turin", "value": 138028.8, "color": "#ed1c24"}], "configs": [["Vera", "T=176,-multi"], ["Grace", "T=72,-multi"], ["Turin", "T=256,-multi"]], "vg": "1.72x", "vt": "0.19x"}, {"title": "john-the-ripper — Hashes cracked/s", "category": "Crypto", "unit": "c/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 5126000.0, "color": "#76b900"}, {"label": "Grace", "value": 1951000.0, "color": "#4299e1"}, {"label": "Turin", "value": 21813000.0, "color": "#ed1c24"}], "configs": [["Vera", "md5crypt,OMP"], ["Grace", "md5crypt,OMP"], ["Turin", "md5crypt,OMP"]], "vg": "2.63x", "vt": "0.23x"}, {"title": "hackbench — Time", "category": "Scheduler", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 0.008, "color": "#76b900"}, {"label": "Grace", "value": 0.023, "color": "#4299e1"}, {"label": "Turin", "value": 0.005, "color": "#ed1c24"}], "configs": [["Vera", "l=1000,g=40"], ["Grace", "l=1000,g=40"], ["Turin", "l=1000,g=40"]], "vg": "2.88x", "vt": "0.62x"}, {"title": "povray — Trace Time", "category": "Rendering", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 2.497, "color": "#76b900"}, {"label": "Turin", "value": 2.405, "color": "#ed1c24"}], "configs": [["Vera", "768x576,Q9,T=176"], ["Turin", "768x576,Q9,T=512"]], "vg": "", "vt": "0.96x"}, {"title": "redis — SET requests/sec", "category": "Database", "unit": "req/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 153609.83, "color": "#76b900"}, {"label": "Grace", "value": 97262.07, "color": "#4299e1"}, {"label": "Turin", "value": 157480.31, "color": "#ed1c24"}], "configs": [["Vera", "n=1M,c=64"], ["Grace", "n=2M,c=64"], ["Turin", "n=2M,c=64"]], "vg": "1.58x", "vt": "0.98x"}, {"title": "opencv-bench — GaussianBlur 4K", "category": "Vision", "unit": "ops/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 564.45, "color": "#76b900"}], "configs": [["Vera", "opencv-python"]], "vg": "", "vt": ""}, {"title": "cython-bench — fib(10M) x100", "category": "Python", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 0.3, "color": "#76b900"}], "configs": [["Vera", "Cython"]], "vg": "", "vt": ""}, {"title": "stream — Triad", "category": "Memory", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Grace", "value": 467918.4, "color": "#4299e1"}], "configs": [["Grace", "T=72,100M"]], "vg": "", "vt": ""}, {"title": "svt-hevc — Encoding FPS", "category": "Video", "unit": "fps", "lower_better": false, "datasets": [{"label": "Turin", "value": 30.0, "color": "#ed1c24"}], "configs": [["Turin", "1080p,encMode7,T=512"]], "vg": "", "vt": ""}, {"title": "pyperformance — Geomean latency (56 benchmarks)", "category": "Python", "unit": "ms", "lower_better": true, "datasets": [{"label": "Vera", "value": 60.334, "color": "#76b900"}, {"label": "Turin", "value": 123.928, "color": "#ed1c24"}], "configs": [["Vera", "Python 3.13.2, single-core, --fast, HBM"], ["Turin", "Python 3.12.x, single-core, --fast, DDR5-6000"]], "vg": "", "vt": "2.05x (Vera faster)"}];
+// ── Summary chart ────────────────────────────────────────────────────────────
+const SUMMARY = [{"label": "zstd L3-long cmp", "vera": 13.106, "turin": 6.009, "lower_better": false}, {"label": "zstd L8-long cmp", "vera": 7.352, "turin": 3.862, "lower_better": false}, {"label": "dav1d Decode FPS", "vera": 5.273, "turin": 0.056, "lower_better": false}, {"label": "hackbench Time", "vera": 2.875, "turin": 4.6, "lower_better": true}, {"label": "john-ripper", "vera": 2.627, "turin": 11.18, "lower_better": false}, {"label": "zstd L3-long decmp", "vera": 2.578, "turin": 1.306, "lower_better": false}, {"label": "zstd L8-long decmp", "vera": 2.49, "turin": 1.325, "lower_better": false}, {"label": "openssl AES-256-CBC", "vera": 2.476, "turin": 2.147, "lower_better": false}, {"label": "zstd L8 decmp", "vera": 2.394, "turin": 1.354, "lower_better": false}, {"label": "c-ray 7500x3500", "vera": 2.381, "turin": 0.935, "lower_better": true}, {"label": "zstd L19 decmp", "vera": 2.356, "turin": 1.383, "lower_better": false}, {"label": "sysbench CPU events/sec", "vera": 2.339, "turin": 2.332, "lower_better": false}, {"label": "zstd L19-long decmp", "vera": 2.326, "turin": 1.18, "lower_better": false}, {"label": "stockfish (ST)", "vera": 2.244, "turin": 2.269, "lower_better": false}, {"label": "npb EP Mop/s", "vera": 2.236, "turin": 1.471, "lower_better": false}, {"label": "scikit-learn RandomForest fit", "vera": 1.979, "turin": null, "lower_better": true}, {"label": "build-kernel", "vera": 1.95, "turin": 39.0, "lower_better": true}, {"label": "zstd L3 cmp", "vera": 1.736, "turin": 1.587, "lower_better": false}, {"label": "stockfish (MT)", "vera": 1.735, "turin": 2.459, "lower_better": false}, {"label": "himeno MFLOPS", "vera": 1.732, "turin": 0.288, "lower_better": false}, {"label": "openssl RSA4096 sign/s", "vera": 1.725, "turin": 9.242, "lower_better": false}, {"label": "stress-ng bogo ops/s", "vera": 1.706, "turin": 11.362, "lower_better": false}, {"label": "zstd L19-long cmp", "vera": 1.62, "turin": 1.598, "lower_better": false}, {"label": "svt-av1", "vera": 1.581, "turin": 0.513, "lower_better": false}, {"label": "redis SET requests/sec", "vera": 1.579, "turin": 1.619, "lower_better": false}, {"label": "numpy matmul GFLOPS", "vera": 1.47, "turin": 1.408, "lower_better": false}, {"label": "zstd L19 cmp", "vera": 1.445, "turin": 1.556, "lower_better": false}, {"label": "ramspeed INTEGER Copy", "vera": 1.379, "turin": 0.404, "lower_better": false}, {"label": "tjbench JPEG compress", "vera": 1.279, "turin": null, "lower_better": false}, {"label": "x264", "vera": 1.272, "turin": 0.458, "lower_better": false}, {"label": "build-php Compile Time", "vera": 1.267, "turin": 1.056, "lower_better": true}, {"label": "x265", "vera": 1.227, "turin": 0.404, "lower_better": false}, {"label": "zstd L8 cmp", "vera": 1.141, "turin": 2.965, "lower_better": false}, {"label": "7zip Compression", "vera": 1.139, "turin": 0.838, "lower_better": false}, {"label": "rust-mandel 7680x4320 Mandelbrot", "vera": 1.078, "turin": 1.194, "lower_better": true}, {"label": "onednn ResNet50 conv GFLOPS", "vera": 0.988, "turin": 3.138, "lower_better": false}, {"label": "m-queens N=18 Queens", "vera": 0.919, "turin": 0.768, "lower_better": true}, {"label": "7zip Decompression", "vera": 0.858, "turin": 0.577, "lower_better": false}, {"label": "zstd L3 decmp", "vera": null, "turin": 0.278, "lower_better": false}, {"label": "stream", "vera": null, "turin": null, "lower_better": false}];
+
+(function() {
+  const labels  = SUMMARY.map(d => d.label);
+  const veraVals  = SUMMARY.map(d => d.vera);
+  const turinVals = SUMMARY.map(d => d.turin);
+
+  const gridColor = '#e2e8f0';
+  const tickColor = '#64748b';
+
+  new Chart(document.getElementById('summaryChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Vera',
+          data: veraVals,
+          backgroundColor: '#5a8a0099',
+          borderColor: '#5a8a00',
+          borderWidth: 1.5,
+          borderRadius: 3,
+        },
+        {
+          label: 'Turin',
+          data: turinVals,
+          backgroundColor: '#c0000f99',
+          borderColor: '#c0000f',
+          borderWidth: 1.5,
+          borderRadius: 3,
+        },
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { color: tickColor, font: { size: 12 }, boxWidth: 14 },
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.x != null ? ctx.parsed.x.toFixed(2) : "n/a"}x Grace`,
+          }
+        },
+        annotation: {
+          annotations: {
+            baseline: {
+              type: 'line',
+              xMin: 1, xMax: 1,
+              borderColor: '#2176c7',
+              borderWidth: 2,
+              borderDash: [6, 3],
+              label: {
+                display: true,
+                content: 'Grace = 1.0',
+                position: 'start',
+                yAdjust: -6,
+                backgroundColor: '#2176c7',
+                color: '#ffffff',
+                font: { size: 10, weight: 'bold' },
+                padding: { x: 5, y: 3 },
+                borderRadius: 4,
+              }
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'Relative performance (Grace = 1.0)', color: tickColor, font: { size: 11 } },
+          ticks: { color: tickColor, font: { size: 10 }, callback: v => v.toFixed(1) + 'x' },
+          grid: { color: gridColor },
+          beginAtZero: true,
+        },
+        y: {
+          ticks: { color: tickColor, font: { size: 11 } },
+          grid: { color: gridColor },
+        }
+      }
+    }
+  });
+})();
+
+// ── Individual charts ─────────────────────────────────────────────────────────
+const CHARTS = [{"title": "stream — Triad", "category": "Memory", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 1029171.8, "color": "#5a8a00"}, {"label": "Turin", "value": 351478.0, "color": "#c0000f"}], "configs": [["Vera", "T=176,300M"], ["Turin", "T=256,300M"]], "vg": "", "vt": "2.93x"}, {"title": "sysbench — CPU events/sec", "category": "System", "unit": "events/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 661027.47, "color": "#5a8a00"}, {"label": "Grace", "value": 282622.65, "color": "#2176c7"}, {"label": "Turin", "value": 659128.49, "color": "#c0000f"}], "configs": [["Vera", "T=176,30s"], ["Grace", "T=72,30s"], ["Turin", "T=256,30s"]], "vg": "2.34x", "vt": "1.00x"}, {"title": "m-queens — N=18 Queens", "category": "Algorithm", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 159.442, "color": "#5a8a00"}, {"label": "Grace", "value": 146.531, "color": "#2176c7"}, {"label": "Turin", "value": 190.89, "color": "#c0000f"}], "configs": [["Vera", "OMP,T=176"], ["Grace", "OMP,T=72"], ["Turin", "OMP,T=256"]], "vg": "0.92x", "vt": "1.20x"}, {"title": "stress-ng — bogo ops/s", "category": "System", "unit": "ops/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 54025.86, "color": "#5a8a00"}, {"label": "Grace", "value": 31667.36, "color": "#2176c7"}, {"label": "Turin", "value": 359795.72, "color": "#c0000f"}], "configs": [["Vera", "T=176,cpu-ops=100k"], ["Grace", "T=72,cpu-ops=100k"], ["Turin", "T=256,cpu-ops=100k"]], "vg": "1.71x", "vt": "0.15x"}, {"title": "scikit-learn — RandomForest fit", "category": "ML", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 1.942, "color": "#5a8a00"}, {"label": "Grace", "value": 3.843, "color": "#2176c7"}], "configs": [["Vera", "n=100k,500 trees,n_jobs=-1"], ["Grace", "n=100k,500 trees,n_jobs=-1"]], "vg": "1.98x", "vt": ""}, {"title": "tjbench — JPEG compress", "category": "Imaging", "unit": "MP/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 416.410733, "color": "#5a8a00"}, {"label": "Grace", "value": 325.671309, "color": "#2176c7"}], "configs": [["Vera", "1920x1080,q=95"], ["Grace", "1920x1080,q=95"]], "vg": "1.28x", "vt": ""}, {"title": "npb — EP Mop/s", "category": "HPC", "unit": "Mop/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 29043.32, "color": "#5a8a00"}, {"label": "Grace", "value": 12986.41, "color": "#2176c7"}, {"label": "Turin", "value": 19100.74, "color": "#c0000f"}], "configs": [["Vera", "Class=C,T=176"], ["Grace", "Class=C,T=72"], ["Turin", "Class=C,T=256"]], "vg": "2.24x", "vt": "1.52x"}, {"title": "build-php — Compile Time", "category": "Build", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 15.0, "color": "#5a8a00"}, {"label": "Grace", "value": 19.0, "color": "#2176c7"}, {"label": "Turin", "value": 18.0, "color": "#c0000f"}], "configs": [["Vera", "-j176,--disable-all"], ["Grace", "-j72,--disable-all"], ["Turin", "-j256,--disable-all"]], "vg": "1.27x", "vt": "1.20x"}, {"title": "build-linux-kernel — Compile Time", "category": "Build", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 20.0, "color": "#5a8a00"}, {"label": "Grace", "value": 39.0, "color": "#2176c7"}, {"label": "Turin", "value": 1.0, "color": "#c0000f"}], "configs": [["Vera", "-j176,arm64 defconfig"], ["Grace", "-j72,arm64 defconfig"], ["Turin", "-j256,arm64 defconfig"]], "vg": "1.95x", "vt": "0.05x"}, {"title": "compress-7zip — Compression", "category": "Compression", "unit": "MIPS", "lower_better": false, "datasets": [{"label": "Vera", "value": 6554.0, "color": "#5a8a00"}, {"label": "Grace", "value": 5754.0, "color": "#2176c7"}, {"label": "Turin", "value": 4820.0, "color": "#c0000f"}], "configs": [["Vera", "T=176,7z 22.01"], ["Grace", "T=72,7z 22.01"], ["Turin", "T=256,7z 22.01"]], "vg": "1.14x", "vt": "1.36x"}, {"title": "compress-7zip — Decompression", "category": "Compression", "unit": "MIPS", "lower_better": false, "datasets": [{"label": "Vera", "value": 4951.0, "color": "#5a8a00"}, {"label": "Grace", "value": 5768.0, "color": "#2176c7"}, {"label": "Turin", "value": 3330.0, "color": "#c0000f"}], "configs": [["Vera", "T=176,7z 22.01"], ["Grace", "T=72,7z 22.01"], ["Turin", "T=256,7z 22.01"]], "vg": "0.86x", "vt": "1.49x"}, {"title": "ramspeed — INTEGER Copy", "category": "Memory", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 231233.5, "color": "#5a8a00"}, {"label": "Grace", "value": 167664.2, "color": "#2176c7"}, {"label": "Turin", "value": 67668.0, "color": "#c0000f"}], "configs": [["Vera", "T=176,256MB"], ["Grace", "T=72,256MB"], ["Turin", "T=256,256MB"]], "vg": "1.38x", "vt": "3.42x"}, {"title": "himeno — MFLOPS", "category": "HPC", "unit": "MFLOPS", "lower_better": false, "datasets": [{"label": "Vera", "value": 162217.0, "color": "#5a8a00"}, {"label": "Grace", "value": 93647.4, "color": "#2176c7"}, {"label": "Turin", "value": 26941.8, "color": "#c0000f"}], "configs": [["Vera", "3D-stencil,T=176"], ["Grace", "3D-stencil,T=72"], ["Turin", "3D-stencil,T=256"]], "vg": "1.73x", "vt": "6.02x"}, {"title": "onednn — ResNet50 conv GFLOPS", "category": "DL", "unit": "GFLOPS", "lower_better": false, "datasets": [{"label": "Vera", "value": 84130.0, "color": "#5a8a00"}, {"label": "Grace", "value": 85152.0, "color": "#2176c7"}, {"label": "Turin", "value": 267206.0, "color": "#c0000f"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "0.99x", "vt": "0.31x"}, {"title": "x264 — Encoding FPS", "category": "Video", "unit": "fps", "lower_better": false, "datasets": [{"label": "Vera", "value": 435.0, "color": "#5a8a00"}, {"label": "Grace", "value": 342.0, "color": "#2176c7"}, {"label": "Turin", "value": 156.61, "color": "#c0000f"}], "configs": [["Vera", "1080p,medium,T=176,1800f,src-built+SVE2"], ["Grace", "1080p,medium,T=72,1800f,apt-0.163+NEON"], ["Turin", "1080p,medium,T=256"]], "vg": "1.27x", "vt": "2.78x"}, {"title": "x265 — Encoding FPS", "category": "Video", "unit": "fps", "lower_better": false, "datasets": [{"label": "Vera", "value": 146.0, "color": "#5a8a00"}, {"label": "Grace", "value": 119.0, "color": "#2176c7"}, {"label": "Turin", "value": 48.12, "color": "#c0000f"}], "configs": [["Vera", "1080p,medium,T=44(peak),1800f,src-built+SVE2"], ["Grace", "1080p,medium,T=72,1800f,src-built+SVE2"], ["Turin", "1080p,medium,T=256"]], "vg": "1.23x", "vt": "3.03x"}, {"title": "svt-av1 — Encoding FPS", "category": "Video", "unit": "fps", "lower_better": false, "datasets": [{"label": "Vera", "value": 1193.566, "color": "#5a8a00"}, {"label": "Grace", "value": 754.816, "color": "#2176c7"}, {"label": "Turin", "value": 387.207, "color": "#c0000f"}], "configs": [["Vera", "1080p,preset8,LP=176,900f,src-built+armv8.2+dotprod"], ["Grace", "1080p,preset8,LP=72,900f,src-built+armv8.2+dotprod"], ["Turin", "1080p,preset8,LP=256"]], "vg": "1.58x", "vt": "3.08x"}, {"title": "numpy — matmul GFLOPS", "category": "Python/ML", "unit": "GFLOPS", "lower_better": false, "datasets": [{"label": "Vera", "value": 2626.14, "color": "#5a8a00"}, {"label": "Grace", "value": 1786.3, "color": "#2176c7"}, {"label": "Turin", "value": 2514.43, "color": "#c0000f"}], "configs": [["Vera", "numpy,OMP_NUM_THREADS=176"], ["Grace", "numpy,OMP_NUM_THREADS=72"], ["Turin", "numpy,OMP_NUM_THREADS=256"]], "vg": "1.47x", "vt": "1.04x"}, {"title": "dav1d — Decode FPS", "category": "Video", "unit": "fps", "lower_better": false, "datasets": [{"label": "Vera", "value": 2183.07, "color": "#5a8a00"}, {"label": "Grace", "value": 414.02, "color": "#2176c7"}, {"label": "Turin", "value": 23.04, "color": "#c0000f"}], "configs": [["Vera", "1080p,T=176"], ["Grace", "1080p,T=72"], ["Turin", "1080p,T=256"]], "vg": "5.27x", "vt": "94.75x"}, {"title": "compress-zstd — L3 compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 13634.7, "color": "#5a8a00"}, {"label": "Grace", "value": 7854.9, "color": "#2176c7"}, {"label": "Turin", "value": 12466.3, "color": "#c0000f"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "1.74x", "vt": "1.09x"}, {"title": "compress-zstd — L8 compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 2247.3, "color": "#5a8a00"}, {"label": "Grace", "value": 1969.5, "color": "#2176c7"}, {"label": "Turin", "value": 5840.4, "color": "#c0000f"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "1.14x", "vt": "0.38x"}, {"title": "compress-zstd — L8 decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 4536.7, "color": "#5a8a00"}, {"label": "Grace", "value": 1894.7, "color": "#2176c7"}, {"label": "Turin", "value": 2564.6, "color": "#c0000f"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "2.39x", "vt": "1.77x"}, {"title": "compress-zstd — L19 compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 114.0, "color": "#5a8a00"}, {"label": "Grace", "value": 78.9, "color": "#2176c7"}, {"label": "Turin", "value": 122.8, "color": "#c0000f"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "1.44x", "vt": "0.93x"}, {"title": "compress-zstd — L19 decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 4264.6, "color": "#5a8a00"}, {"label": "Grace", "value": 1810.2, "color": "#2176c7"}, {"label": "Turin", "value": 2504.3, "color": "#c0000f"}], "configs": [["Vera", "T=176"], ["Grace", "T=72"], ["Turin", "T=256"]], "vg": "2.36x", "vt": "1.70x"}, {"title": "compress-zstd — L3-long compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 1367.0, "color": "#5a8a00"}, {"label": "Grace", "value": 104.3, "color": "#2176c7"}, {"label": "Turin", "value": 626.7, "color": "#c0000f"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "13.11x", "vt": "2.18x"}, {"title": "compress-zstd — L3-long decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 4809.5, "color": "#5a8a00"}, {"label": "Grace", "value": 1865.6, "color": "#2176c7"}, {"label": "Turin", "value": 2435.7, "color": "#c0000f"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "2.58x", "vt": "1.97x"}, {"title": "compress-zstd — L8-long compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 1252.0, "color": "#5a8a00"}, {"label": "Grace", "value": 170.3, "color": "#2176c7"}, {"label": "Turin", "value": 657.7, "color": "#c0000f"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "7.35x", "vt": "1.90x"}, {"title": "compress-zstd — L8-long decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 5013.8, "color": "#5a8a00"}, {"label": "Grace", "value": 2013.7, "color": "#2176c7"}, {"label": "Turin", "value": 2667.7, "color": "#c0000f"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "2.49x", "vt": "1.88x"}, {"title": "compress-zstd — L19-long compress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 66.9, "color": "#5a8a00"}, {"label": "Grace", "value": 41.3, "color": "#2176c7"}, {"label": "Turin", "value": 66.0, "color": "#c0000f"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "1.62x", "vt": "1.01x"}, {"title": "compress-zstd — L19-long decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 4562.3, "color": "#5a8a00"}, {"label": "Grace", "value": 1961.5, "color": "#2176c7"}, {"label": "Turin", "value": 2314.3, "color": "#c0000f"}], "configs": [["Vera", "T=176,--long"], ["Grace", "T=72,--long"], ["Turin", "T=256,--long"]], "vg": "2.33x", "vt": "1.97x"}, {"title": "compress-zstd — L3 decompress", "category": "Compression", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Grace", "value": 8347.0, "color": "#2176c7"}, {"label": "Turin", "value": 2317.0, "color": "#c0000f"}], "configs": [["Grace", "T=72"], ["Turin", "T=256"]], "vg": "", "vt": ""}, {"title": "stockfish — Nodes/second (Multi-threaded)", "category": "Chess", "unit": "N/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 165542485.0, "color": "#5a8a00"}, {"label": "Grace", "value": 95410829.0, "color": "#2176c7"}, {"label": "Turin", "value": 234613216.0, "color": "#c0000f"}], "configs": [["Vera", "bench 128 T=176"], ["Grace", "bench 128 T=72"], ["Turin", "bench 128 T=256"]], "vg": "1.74x", "vt": "0.71x"}, {"title": "stockfish — Nodes/second (Single-threaded)", "category": "Chess", "unit": "N/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 1752660.0, "color": "#5a8a00"}, {"label": "Grace", "value": 781056.0, "color": "#2176c7"}, {"label": "Turin", "value": 1772385.0, "color": "#c0000f"}], "configs": [["Vera", "bench 128 1 30,T=1"], ["Grace", "bench 128 1 30,T=1"], ["Turin", "bench 128 1 30,T=1"]], "vg": "2.24x", "vt": "0.99x"}, {"title": "rust-mandel — 7680x4320 Mandelbrot", "category": "Compute", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 17.467, "color": "#5a8a00"}, {"label": "Grace", "value": 18.837, "color": "#2176c7"}, {"label": "Turin", "value": 15.78, "color": "#c0000f"}], "configs": [["Vera", "Rust,single-thread"], ["Grace", "Rust,single-thread"], ["Turin", "Rust,single-thread"]], "vg": "1.08x", "vt": "0.90x"}, {"title": "c-ray — 7500x3500", "category": "Rendering", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 0.042, "color": "#5a8a00"}, {"label": "Grace", "value": 0.1, "color": "#2176c7"}, {"label": "Turin", "value": 0.107, "color": "#c0000f"}], "configs": [["Vera", "MT,T=176"], ["Grace", "MT,T=72"], ["Turin", "MT,T=256"]], "vg": "2.38x", "vt": "2.55x"}, {"title": "openssl — AES-256-CBC", "category": "Crypto", "unit": "bytes/sec", "lower_better": false, "datasets": [{"label": "Vera", "value": 340105301237.0, "color": "#5a8a00"}, {"label": "Grace", "value": 137380630272.0, "color": "#2176c7"}, {"label": "Turin", "value": 294943837562.0, "color": "#c0000f"}], "configs": [["Vera", "T=176,-multi,-evp"], ["Grace", "T=72,-multi,-evp"], ["Turin", "T=256,-multi,-evp"]], "vg": "2.48x", "vt": "1.15x"}, {"title": "openssl — RSA4096 sign/s", "category": "Crypto", "unit": "sign/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 25758.3, "color": "#5a8a00"}, {"label": "Grace", "value": 14934.5, "color": "#2176c7"}, {"label": "Turin", "value": 138028.8, "color": "#c0000f"}], "configs": [["Vera", "T=176,-multi"], ["Grace", "T=72,-multi"], ["Turin", "T=256,-multi"]], "vg": "1.72x", "vt": "0.19x"}, {"title": "john-the-ripper — Hashes cracked/s", "category": "Crypto", "unit": "c/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 5126000.0, "color": "#5a8a00"}, {"label": "Grace", "value": 1951000.0, "color": "#2176c7"}, {"label": "Turin", "value": 21813000.0, "color": "#c0000f"}], "configs": [["Vera", "md5crypt,OMP"], ["Grace", "md5crypt,OMP"], ["Turin", "md5crypt,OMP"]], "vg": "2.63x", "vt": "0.23x"}, {"title": "hackbench — Time", "category": "Scheduler", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 0.008, "color": "#5a8a00"}, {"label": "Grace", "value": 0.023, "color": "#2176c7"}, {"label": "Turin", "value": 0.005, "color": "#c0000f"}], "configs": [["Vera", "l=1000,g=40"], ["Grace", "l=1000,g=40"], ["Turin", "l=1000,g=40"]], "vg": "2.88x", "vt": "0.62x"}, {"title": "povray — Trace Time", "category": "Rendering", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 2.497, "color": "#5a8a00"}, {"label": "Turin", "value": 2.405, "color": "#c0000f"}], "configs": [["Vera", "768x576,Q9,T=176"], ["Turin", "768x576,Q9,T=512"]], "vg": "", "vt": "0.96x"}, {"title": "redis — SET requests/sec", "category": "Database", "unit": "req/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 153609.83, "color": "#5a8a00"}, {"label": "Grace", "value": 97262.07, "color": "#2176c7"}, {"label": "Turin", "value": 157480.31, "color": "#c0000f"}], "configs": [["Vera", "n=1M,c=64"], ["Grace", "n=2M,c=64"], ["Turin", "n=2M,c=64"]], "vg": "1.58x", "vt": "0.98x"}, {"title": "opencv-bench — GaussianBlur 4K", "category": "Vision", "unit": "ops/s", "lower_better": false, "datasets": [{"label": "Vera", "value": 564.45, "color": "#5a8a00"}], "configs": [["Vera", "opencv-python"]], "vg": "", "vt": ""}, {"title": "cython-bench — fib(10M) x100", "category": "Python", "unit": "seconds", "lower_better": true, "datasets": [{"label": "Vera", "value": 0.3, "color": "#5a8a00"}], "configs": [["Vera", "Cython"]], "vg": "", "vt": ""}, {"title": "stream — Triad", "category": "Memory", "unit": "MB/s", "lower_better": false, "datasets": [{"label": "Grace", "value": 467918.4, "color": "#2176c7"}], "configs": [["Grace", "T=72,100M"]], "vg": "", "vt": ""}, {"title": "svt-hevc — Encoding FPS", "category": "Video", "unit": "fps", "lower_better": false, "datasets": [{"label": "Turin", "value": 30.0, "color": "#c0000f"}], "configs": [["Turin", "1080p,encMode7,T=512"]], "vg": "", "vt": ""}, {"title": "pyperformance — Geomean latency (56 benchmarks)", "category": "Python", "unit": "ms", "lower_better": true, "datasets": [{"label": "Vera", "value": 60.334, "color": "#5a8a00"}, {"label": "Turin", "value": 123.928, "color": "#c0000f"}], "configs": [["Vera", "Python 3.13.2, single-core, --fast, HBM"], ["Turin", "Python 3.12.x, single-core, --fast, DDR5-6000"]], "vg": "", "vt": "2.05x (Vera faster)"}];
 
 const cats = [...new Set(CHARTS.map(c => c.category))].sort();
-const filterDiv = document.querySelector(".filters");
+const filterDiv = document.querySelector('.filters');
 cats.forEach(cat => {
-  const b = document.createElement("button");
-  b.className = "filter-btn";
+  const b = document.createElement('button');
+  b.className = 'filter-btn';
   b.textContent = cat;
-  b.onclick = () => filter(b, cat);
+  b.onclick = () => filterCat(b, cat);
   filterDiv.appendChild(b);
 });
 
-function filter(btn, cat) {
-  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  document.querySelectorAll(".card").forEach(card => {
-    card.style.display = (cat === "all" || card.dataset.cat === cat) ? "" : "none";
+function filterCat(btn, cat) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.card').forEach(card => {
+    card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
   });
 }
 
 function fmtVal(v) {
   const a = Math.abs(v);
-  if (a >= 1e12) return (v/1e12).toPrecision(3) + "T";
-  if (a >= 1e9)  return (v/1e9).toPrecision(3)  + "G";
-  if (a >= 1e6)  return (v/1e6).toPrecision(3)  + "M";
-  if (a >= 1e3)  return (v/1e3).toPrecision(3)  + "K";
+  if (a >= 1e12) return (v/1e12).toPrecision(3) + 'T';
+  if (a >= 1e9)  return (v/1e9).toPrecision(3)  + 'G';
+  if (a >= 1e6)  return (v/1e6).toPrecision(3)  + 'M';
+  if (a >= 1e3)  return (v/1e3).toPrecision(3)  + 'K';
   if (a < 0.01)  return v.toFixed(4);
   return parseFloat(v.toPrecision(4)).toString();
 }
 
-const grid = document.getElementById("grid");
+const grid = document.getElementById('grid');
+const gridColor = '#e2e8f0';
+const tickColor = '#64748b';
 
 CHARTS.forEach((ch, idx) => {
-  const card = document.createElement("div");
-  card.className = "card";
+  const card = document.createElement('div');
+  card.className = 'card';
   card.dataset.cat = ch.category;
 
   const dirHtml = ch.lower_better
-    ? `<div class="direction-badge lower">&#x2193; lower is better</div>`
-    : `<div class="direction-badge">&#x2191; higher is better</div>`;
+    ? '<div class="direction-badge lower">&#x2193; lower is better</div>'
+    : '<div class="direction-badge">&#x2191; higher is better</div>';
 
   const ratioHtml = [
-    ch.vg ? `<span class="ratio-pill">vs Grace: <strong>${ch.vg}</strong></span>` : "",
-    ch.vt ? `<span class="ratio-pill">vs Turin: <strong>${ch.vt}</strong></span>` : "",
-  ].filter(Boolean).join("");
+    ch.vg ? `<span class="ratio-pill">vs Grace: <strong>${ch.vg}</strong></span>` : '',
+    ch.vt ? `<span class="ratio-pill">vs Turin: <strong>${ch.vt}</strong></span>` : '',
+  ].filter(Boolean).join('');
 
   const configRows = ch.configs.map(([lbl, cfg]) =>
-    `<tr><td>${lbl}</td><td>${cfg || "—"}</td></tr>`
-  ).join("");
+    `<tr><td>${lbl}</td><td>${cfg || '—'}</td></tr>`
+  ).join('');
 
   card.innerHTML = `
     <div class="card-header">
@@ -169,20 +299,19 @@ CHARTS.forEach((ch, idx) => {
     </div>
     ${dirHtml}
     <div class="chart-wrap"><canvas id="c${idx}"></canvas></div>
-    ${ratioHtml ? `<div class="ratios">${ratioHtml}</div>` : ""}
+    ${ratioHtml ? `<div class="ratios">${ratioHtml}</div>` : ''}
     <div class="config-label">Configuration</div>
     <table class="config-table"><tbody>${configRows}</tbody></table>
   `;
   grid.appendChild(card);
 
-  const ctx = document.getElementById(`c${idx}`).getContext("2d");
-  new Chart(ctx, {
-    type: "bar",
+  new Chart(document.getElementById(`c${idx}`).getContext('2d'), {
+    type: 'bar',
     data: {
       labels: ch.datasets.map(d => d.label),
       datasets: [{
         data: ch.datasets.map(d => d.value),
-        backgroundColor: ch.datasets.map(d => d.color + "99"),
+        backgroundColor: ch.datasets.map(d => d.color + '99'),
         borderColor: ch.datasets.map(d => d.color),
         borderWidth: 1.5,
         borderRadius: 5,
@@ -194,20 +323,18 @@ CHARTS.forEach((ch, idx) => {
       plugins: {
         legend: { display: false },
         tooltip: {
-          callbacks: {
-            label: ctx => ` ${fmtVal(ctx.parsed.y)} ${ch.unit}`
-          }
+          callbacks: { label: ctx => ` ${fmtVal(ctx.parsed.y)} ${ch.unit}` }
         }
       },
       scales: {
         x: {
-          ticks: { color: "#64748b", font: { size: 12, weight: "600" } },
-          grid: { color: "#e2e8f0" }
+          ticks: { color: tickColor, font: { size: 12, weight: '600' } },
+          grid: { color: gridColor }
         },
         y: {
-          title: { display: true, text: ch.unit, color: "#64748b", font: { size: 11 } },
-          ticks: { color: "#64748b", font: { size: 10 }, callback: v => fmtVal(v) },
-          grid: { color: "#e2e8f0" },
+          title: { display: true, text: ch.unit, color: tickColor, font: { size: 11 } },
+          ticks: { color: tickColor, font: { size: 10 }, callback: v => fmtVal(v) },
+          grid: { color: gridColor },
           beginAtZero: true
         }
       }
