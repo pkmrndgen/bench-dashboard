@@ -7,14 +7,14 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --vera: #76b900; --grace: #4299e1; --turin: #ed1c24;
-    --bg: #0f1117; --card: #1a1d27; --border: #2a2d3e;
-    --text: #e2e8f0; --muted: #94a3b8; --label: #cbd5e1;
+    --vera: #5a8a00; --grace: #2176c7; --turin: #c0000f;
+    --bg: #ffffff; --card: #f8f9fa; --border: #e2e8f0;
+    --text: #111827; --muted: #64748b; --label: #374151;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); }
   header {
-    background: linear-gradient(135deg, #0f1117 0%, #1a1d27 100%);
+    background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 100%);
     border-bottom: 1px solid var(--border);
     padding: 2rem;
     text-align: center;
@@ -63,23 +63,23 @@
   .card-cat {
     font-size: 0.68rem; font-weight: 600; padding: 0.18rem 0.5rem;
     border-radius: 999px; white-space: nowrap; flex-shrink: 0;
-    background: #2a2d3e; color: var(--muted);
+    background: #e8edf3; color: var(--muted);
   }
   .chart-wrap { position: relative; height: 200px; }
   .direction-badge {
     font-size: 0.7rem; color: var(--muted);
     display: flex; align-items: center; gap: 0.3rem;
   }
-  .direction-badge.lower { color: #f59e0b; }
+  .direction-badge.lower { color: #b45309; }
   .ratios { display: flex; gap: 0.6rem; flex-wrap: wrap; }
   .ratio-pill {
     font-size: 0.74rem; padding: 0.15rem 0.5rem; border-radius: 4px;
-    background: #232637; color: var(--muted);
+    background: #e8edf3; color: var(--muted);
   }
   .ratio-pill strong { color: var(--text); }
   .config-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
   .config-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; }
-  .config-table td { padding: 0.2rem 0.4rem; border-top: 1px solid #232637; vertical-align: top; }
+  .config-table td { padding: 0.2rem 0.4rem; border-top: 1px solid #e2e8f0; vertical-align: top; }
   .config-table td:first-child { color: var(--muted); white-space: nowrap; width: 48px; }
   .config-table td:last-child { color: var(--label); font-family: monospace; font-size: 0.72rem; }
   footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: 0.78rem; border-top: 1px solid var(--border); margin-top: 1rem; }
@@ -182,7 +182,7 @@ CHARTS.forEach((ch, idx) => {
       labels: ch.datasets.map(d => d.label),
       datasets: [{
         data: ch.datasets.map(d => d.value),
-        backgroundColor: ch.datasets.map(d => d.color + "bb"),
+        backgroundColor: ch.datasets.map(d => d.color + "99"),
         borderColor: ch.datasets.map(d => d.color),
         borderWidth: 1.5,
         borderRadius: 5,
@@ -201,13 +201,13 @@ CHARTS.forEach((ch, idx) => {
       },
       scales: {
         x: {
-          ticks: { color: "#94a3b8", font: { size: 12, weight: "600" } },
-          grid: { color: "#2a2d3e" }
+          ticks: { color: "#64748b", font: { size: 12, weight: "600" } },
+          grid: { color: "#e2e8f0" }
         },
         y: {
-          title: { display: true, text: ch.unit, color: "#94a3b8", font: { size: 11 } },
-          ticks: { color: "#94a3b8", font: { size: 10 }, callback: v => fmtVal(v) },
-          grid: { color: "#2a2d3e" },
+          title: { display: true, text: ch.unit, color: "#64748b", font: { size: 11 } },
+          ticks: { color: "#64748b", font: { size: 10 }, callback: v => fmtVal(v) },
+          grid: { color: "#e2e8f0" },
           beginAtZero: true
         }
       }
