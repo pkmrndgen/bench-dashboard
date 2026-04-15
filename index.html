@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CPU Benchmark Comparison: Vera vs Grace vs Turin</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3/dist/chartjs-plugin-annotation.min.js"></script>
 <style>
   :root {
     --vera:   #5a8a00;
@@ -59,7 +58,7 @@
   .summary-sub {
     font-size: 0.8rem; color: var(--muted); margin-bottom: 1.25rem;
   }
-  .summary-chart-wrap { position: relative; height: 1280px; }
+  .summary-chart-wrap { position: relative; height: 1520px; }
 
   /* ── Filters ── */
   .filters {
@@ -152,15 +151,18 @@
 
 <script>
 // ── Summary chart ────────────────────────────────────────────────────────────
-const SUMMARY = [{"label": "zstd L3-long cmp", "vera": 13.106, "turin": 6.009, "lower_better": false}, {"label": "zstd L8-long cmp", "vera": 7.352, "turin": 3.862, "lower_better": false}, {"label": "dav1d Decode FPS", "vera": 5.273, "turin": 0.056, "lower_better": false}, {"label": "hackbench Time", "vera": 2.875, "turin": 4.6, "lower_better": true}, {"label": "john-ripper", "vera": 2.627, "turin": 11.18, "lower_better": false}, {"label": "zstd L3-long decmp", "vera": 2.578, "turin": 1.306, "lower_better": false}, {"label": "zstd L8-long decmp", "vera": 2.49, "turin": 1.325, "lower_better": false}, {"label": "openssl AES-256-CBC", "vera": 2.476, "turin": 2.147, "lower_better": false}, {"label": "zstd L8 decmp", "vera": 2.394, "turin": 1.354, "lower_better": false}, {"label": "c-ray 7500x3500", "vera": 2.381, "turin": 0.935, "lower_better": true}, {"label": "zstd L19 decmp", "vera": 2.356, "turin": 1.383, "lower_better": false}, {"label": "sysbench CPU events/sec", "vera": 2.339, "turin": 2.332, "lower_better": false}, {"label": "zstd L19-long decmp", "vera": 2.326, "turin": 1.18, "lower_better": false}, {"label": "stockfish (ST)", "vera": 2.244, "turin": 2.269, "lower_better": false}, {"label": "npb EP Mop/s", "vera": 2.236, "turin": 1.471, "lower_better": false}, {"label": "scikit-learn RandomForest fit", "vera": 1.979, "turin": null, "lower_better": true}, {"label": "build-kernel", "vera": 1.95, "turin": 39.0, "lower_better": true}, {"label": "zstd L3 cmp", "vera": 1.736, "turin": 1.587, "lower_better": false}, {"label": "stockfish (MT)", "vera": 1.735, "turin": 2.459, "lower_better": false}, {"label": "himeno MFLOPS", "vera": 1.732, "turin": 0.288, "lower_better": false}, {"label": "openssl RSA4096 sign/s", "vera": 1.725, "turin": 9.242, "lower_better": false}, {"label": "stress-ng bogo ops/s", "vera": 1.706, "turin": 11.362, "lower_better": false}, {"label": "zstd L19-long cmp", "vera": 1.62, "turin": 1.598, "lower_better": false}, {"label": "svt-av1", "vera": 1.581, "turin": 0.513, "lower_better": false}, {"label": "redis SET requests/sec", "vera": 1.579, "turin": 1.619, "lower_better": false}, {"label": "numpy matmul GFLOPS", "vera": 1.47, "turin": 1.408, "lower_better": false}, {"label": "zstd L19 cmp", "vera": 1.445, "turin": 1.556, "lower_better": false}, {"label": "ramspeed INTEGER Copy", "vera": 1.379, "turin": 0.404, "lower_better": false}, {"label": "tjbench JPEG compress", "vera": 1.279, "turin": null, "lower_better": false}, {"label": "x264", "vera": 1.272, "turin": 0.458, "lower_better": false}, {"label": "build-php Compile Time", "vera": 1.267, "turin": 1.056, "lower_better": true}, {"label": "x265", "vera": 1.227, "turin": 0.404, "lower_better": false}, {"label": "zstd L8 cmp", "vera": 1.141, "turin": 2.965, "lower_better": false}, {"label": "7zip Compression", "vera": 1.139, "turin": 0.838, "lower_better": false}, {"label": "rust-mandel 7680x4320 Mandelbrot", "vera": 1.078, "turin": 1.194, "lower_better": true}, {"label": "onednn ResNet50 conv GFLOPS", "vera": 0.988, "turin": 3.138, "lower_better": false}, {"label": "m-queens N=18 Queens", "vera": 0.919, "turin": 0.768, "lower_better": true}, {"label": "7zip Decompression", "vera": 0.858, "turin": 0.577, "lower_better": false}, {"label": "zstd L3 decmp", "vera": null, "turin": 0.278, "lower_better": false}, {"label": "stream", "vera": null, "turin": null, "lower_better": false}];
+const SUMMARY = [{"label": "7zip Decompression", "vera": 0.858, "turin": 0.577, "lower_better": false}, {"label": "m-queens N=18 Queens", "vera": 0.919, "turin": 0.768, "lower_better": true}, {"label": "onednn ResNet50 conv GFLOPS", "vera": 0.988, "turin": 3.138, "lower_better": false}, {"label": "rust-mandel 7680x4320 Mandelbrot", "vera": 1.078, "turin": 1.194, "lower_better": true}, {"label": "7zip Compression", "vera": 1.139, "turin": 0.838, "lower_better": false}, {"label": "zstd L8 cmp", "vera": 1.141, "turin": 2.965, "lower_better": false}, {"label": "x265", "vera": 1.227, "turin": 0.404, "lower_better": false}, {"label": "build-php Compile Time", "vera": 1.267, "turin": 1.056, "lower_better": true}, {"label": "x264", "vera": 1.272, "turin": 0.458, "lower_better": false}, {"label": "tjbench JPEG compress", "vera": 1.279, "turin": null, "lower_better": false}, {"label": "ramspeed INTEGER Copy", "vera": 1.379, "turin": 0.404, "lower_better": false}, {"label": "zstd L19 cmp", "vera": 1.445, "turin": 1.556, "lower_better": false}, {"label": "numpy matmul GFLOPS", "vera": 1.47, "turin": 1.408, "lower_better": false}, {"label": "redis SET requests/sec", "vera": 1.579, "turin": 1.619, "lower_better": false}, {"label": "svt-av1", "vera": 1.581, "turin": 0.513, "lower_better": false}, {"label": "zstd L19-long cmp", "vera": 1.62, "turin": 1.598, "lower_better": false}, {"label": "stress-ng bogo ops/s", "vera": 1.706, "turin": 11.362, "lower_better": false}, {"label": "openssl RSA4096 sign/s", "vera": 1.725, "turin": 9.242, "lower_better": false}, {"label": "himeno MFLOPS", "vera": 1.732, "turin": 0.288, "lower_better": false}, {"label": "stockfish (MT)", "vera": 1.735, "turin": 2.459, "lower_better": false}, {"label": "zstd L3 cmp", "vera": 1.736, "turin": 1.587, "lower_better": false}, {"label": "build-kernel", "vera": 1.95, "turin": 39.0, "lower_better": true}, {"label": "scikit-learn RandomForest fit", "vera": 1.979, "turin": null, "lower_better": true}, {"label": "npb EP Mop/s", "vera": 2.236, "turin": 1.471, "lower_better": false}, {"label": "stockfish (ST)", "vera": 2.244, "turin": 2.269, "lower_better": false}, {"label": "zstd L19-long decmp", "vera": 2.326, "turin": 1.18, "lower_better": false}, {"label": "sysbench CPU events/sec", "vera": 2.339, "turin": 2.332, "lower_better": false}, {"label": "zstd L19 decmp", "vera": 2.356, "turin": 1.383, "lower_better": false}, {"label": "c-ray 7500x3500", "vera": 2.381, "turin": 0.935, "lower_better": true}, {"label": "zstd L8 decmp", "vera": 2.394, "turin": 1.354, "lower_better": false}, {"label": "openssl AES-256-CBC", "vera": 2.476, "turin": 2.147, "lower_better": false}, {"label": "zstd L8-long decmp", "vera": 2.49, "turin": 1.325, "lower_better": false}, {"label": "zstd L3-long decmp", "vera": 2.578, "turin": 1.306, "lower_better": false}, {"label": "john-ripper", "vera": 2.627, "turin": 11.18, "lower_better": false}, {"label": "hackbench Time", "vera": 2.875, "turin": 4.6, "lower_better": true}, {"label": "dav1d Decode FPS", "vera": 5.273, "turin": 0.056, "lower_better": false}, {"label": "zstd L8-long cmp", "vera": 7.352, "turin": 3.862, "lower_better": false}, {"label": "zstd L3-long cmp", "vera": 13.106, "turin": 6.009, "lower_better": false}, {"label": "zstd L3 decmp", "vera": null, "turin": 0.278, "lower_better": false}, {"label": "stream", "vera": null, "turin": null, "lower_better": false}];
 
 (function() {
-  const labels  = SUMMARY.map(d => d.label);
-  const veraVals  = SUMMARY.map(d => d.vera);
-  const turinVals = SUMMARY.map(d => d.turin);
+  // Filter to items that have at least Vera data, sort ascending by Vera
+  const items = SUMMARY.filter(d => d.vera !== null);
+  const labels    = items.map(d => d.label);
+  const veraVals  = items.map(d => d.vera);
+  const turinVals = items.map(d => d.turin);   // may contain null
 
   const gridColor = '#e2e8f0';
   const tickColor = '#64748b';
+  const n = labels.length;
 
   new Chart(document.getElementById('summaryChart').getContext('2d'), {
     type: 'bar',
@@ -168,20 +170,35 @@ const SUMMARY = [{"label": "zstd L3-long cmp", "vera": 13.106, "turin": 6.009, "
       labels,
       datasets: [
         {
+          type: 'bar',
           label: 'Vera',
           data: veraVals,
           backgroundColor: '#5a8a0099',
           borderColor: '#5a8a00',
           borderWidth: 1.5,
           borderRadius: 3,
+          order: 2,
         },
         {
+          type: 'bar',
           label: 'Turin',
           data: turinVals,
           backgroundColor: '#c0000f99',
           borderColor: '#c0000f',
           borderWidth: 1.5,
           borderRadius: 3,
+          order: 2,
+        },
+        {
+          type: 'line',
+          label: 'Grace = 1.0',
+          data: Array(n).fill(1),
+          borderColor: '#2176c7',
+          borderWidth: 2,
+          borderDash: [6, 4],
+          pointRadius: 0,
+          fill: false,
+          order: 1,
         },
       ]
     },
@@ -193,45 +210,26 @@ const SUMMARY = [{"label": "zstd L3-long cmp", "vera": 13.106, "turin": 6.009, "
         legend: {
           display: true,
           position: 'top',
-          labels: { color: tickColor, font: { size: 12 }, boxWidth: 14 },
+          labels: { color: tickColor, font: { size: 12 }, boxWidth: 14,
+            filter: item => item.text !== 'Grace = 1.0',
+          },
         },
         tooltip: {
+          filter: item => item.datasetIndex < 2,
           callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.x != null ? ctx.parsed.x.toFixed(2) : "n/a"}x Grace`,
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.x != null ? ctx.parsed.x.toFixed(2) + "x Grace" : "n/a"}`,
           }
         },
-        annotation: {
-          annotations: {
-            baseline: {
-              type: 'line',
-              xMin: 1, xMax: 1,
-              borderColor: '#2176c7',
-              borderWidth: 2,
-              borderDash: [6, 3],
-              label: {
-                display: true,
-                content: 'Grace = 1.0',
-                position: 'start',
-                yAdjust: -6,
-                backgroundColor: '#2176c7',
-                color: '#ffffff',
-                font: { size: 10, weight: 'bold' },
-                padding: { x: 5, y: 3 },
-                borderRadius: 4,
-              }
-            }
-          }
-        }
       },
       scales: {
         x: {
-          title: { display: true, text: 'Relative performance (Grace = 1.0)', color: tickColor, font: { size: 11 } },
+          title: { display: true, text: 'Performance relative to Grace (Grace = 1.0  |  dashed blue line)', color: tickColor, font: { size: 11 } },
           ticks: { color: tickColor, font: { size: 10 }, callback: v => v.toFixed(1) + 'x' },
           grid: { color: gridColor },
           beginAtZero: true,
         },
         y: {
-          ticks: { color: tickColor, font: { size: 11 } },
+          ticks: { color: tickColor, font: { size: 10 }, autoSkip: false },
           grid: { color: gridColor },
         }
       }
